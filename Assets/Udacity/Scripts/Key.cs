@@ -7,6 +7,8 @@ public class Key : MonoBehaviour
     //Create a reference to the KeyPoofPrefab and Door
 	public GameObject keyPoof;
 	public Door door;
+	public Hud hud;
+	public bool isCollected = false;
 
 	void Update()
 	{
@@ -16,6 +18,12 @@ public class Key : MonoBehaviour
 
 	public void OnKeyClicked()
 	{
+		// Collect Key
+		isCollected = true;
+
+		// Show Key Pickup Alert
+		hud.DisplayKeyPickup ();
+
         // Instatiate the KeyPoof Prefab where this key is located
 		// Make sure the poof animates vertically
 		Vector3 positionOfKey = new Vector3 (gameObject.transform.position.x, gameObject.transform.position.y, gameObject.transform.transform.position.z);
@@ -27,5 +35,4 @@ public class Key : MonoBehaviour
 		// Destroy the key. Check the Unity documentation on how to use Destroy
 		Destroy (gameObject);
     }
-
 }

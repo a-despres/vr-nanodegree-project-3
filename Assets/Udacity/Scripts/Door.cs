@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Door : MonoBehaviour 
 {
+	// HUD
+	public Hud hud;
+
 	// Audio clips
 	public AudioClip lockedAudioClip;
 	public AudioClip unlockedAudioClip;
@@ -14,13 +17,14 @@ public class Door : MonoBehaviour
 	// Door colors
 	private Renderer renderer;
 	private Color colorOriginal = Color.gray;	// out of focus
-	private Color colorHighlight = Color.blue;	// in focus
+	private Color colorLocked = Color.red;	// in focus, locked
+	private Color colorUnlocked = Color.green; // in focus, unlocked
 
     // Create a boolean value called "locked" that can be checked in Update() 
-	bool locked = true;
+	bool isLocked = true;
 
 	// "doorFullyRaised" is set to true by default so that the door does not open automatically when the key is collected
-	bool doorFullyRaised = true;
+	bool isFullyRaised = true;
 
 	void Awake () {
 		renderer = gameObject.GetComponent<Renderer> ();
@@ -37,7 +41,7 @@ public class Door : MonoBehaviour
 		}
 			
 		// If the door is unlocked and it is not fully raised
-		if (!locked && !doorFullyRaised) {
+		if (!isLocked && !isFullyRaised) {
 			// Animate the door raising up
 			if (gameObject.transform.position.y <= 24) {
 				gameObject.transform.Translate (0, 10f * Time.deltaTime, 0);
@@ -49,20 +53,23 @@ public class Door : MonoBehaviour
 		AudioSource doorAudio = gameObject.GetComponent<AudioSource> ();
 
 		// Play audio clip; determined by the collection of the key in the scene
-		if (!locked) { 
-			doorFullyRaised = false;	
+		if (!isLocked) { 
+			isFullyRaised = false;	
 			doorAudio.clip = unlockedAudioClip;
 			doorAudio.Play ();
 		} else {
 			doorAudio.clip = lockedAudioClip;
 			doorAudio.Play ();
+
+			// Show Locked Door Alert
+			hud.DisplayLockedDoor ();
 		}
 	}
 
     public void Unlock ()
     {
         // You'll need to set "locked" to false here
-		locked = false;
+		isLocked = false;
     }
 
 	public void PointerEnter () {
@@ -77,11 +84,19 @@ public class Door : MonoBehaviour
 
 	void Focus () {
 		// Change color of door when in focus
-		renderer.material.color = Color.Lerp(colorOriginal, colorHighlight, Time.time * 1.0f);
+		if (isLocked) {
+			renderer.material.color = Color.Lerp (colorOriginal, colorLocked, Time.time * 1.0f);
+		} else {
+			renderer.material.color = Color.Lerp (colorOriginal, colorUnlocked, Time.time * 1.0f);
+		}
 	}
 
 	void LoseFocus () {
 		// Change color of door back to original color when not in focus
-		renderer.material.color = Color.Lerp(colorHighlight, colorOriginal, Time.time * 1.0f);
+		if (isLocked) {
+			renderer.material.color = Color.Lerp (colorLocked, colorOriginal, Time.time * 1.0f);
+		} else {
+			renderer.material.color = Color.Lerp (colorUnlocked, colorOriginal, Time.time * 1.0f);
+		}
 	}
 }
